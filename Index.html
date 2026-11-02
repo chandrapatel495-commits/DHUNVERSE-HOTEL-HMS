@@ -1,103 +1,3 @@
-# DHUNVERSE-HOTEL-HMS
-Hotel Management System
-
-<section id="RoomCalendar" class="page">
-  <h2>📅 30 Days Room Calendar</h2>
-
-  <div class="rc-summary">
-    <div>Total Rooms: <b>24</b></div>
-    <div>Super Deluxe: <b>10</b></div>
-    <div>Suite Room: <b>5</b></div>
-    <div>Business Executive: <b>9</b></div>
-  </div>
-
-  <h3>Add New Booking</h3>
-
-  <div class="rc-form">
-    <input id="rcGuest" placeholder="Guest Name">
-    <input id="rcMobile" placeholder="Mobile Number">
-    <select id="rcRoom"></select>
-
-    <label>Check-in Date</label>
-    <input type="date" id="rcIn">
-
-    <label>Check-out Date</label>
-    <input type="date" id="rcOut">
-
-    <button onclick="rcAddBooking()">Save Booking</button>
-  </div>
-
-  <h3>30 Days Availability</h3>
-
-  <label>Calendar Start Date</label>
-  <input type="date" id="rcStart" onchange="rcRender()">
-
-  <div class="rc-legend">
-    <span>🟩 Available</span>
-    <span>🟥 Booked</span>
-    <span>🟦 Check-in</span>
-  </div>
-
-  <div class="rc-scroll">
-    <table id="rcTable">
-      <thead id="rcHead"></thead>
-      <tbody id="rcBody"></tbody>
-    </table>
-  </div>
-
-  <h3>Booking Records</h3>
-  <div id="rcRecords"></div>
-</section>
-
-<style>
-.rc-summary {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  margin:12px 0;
-}
-.rc-summary div {
-  background:#172554;
-  color:white;
-  padding:12px;
-  border-radius:8px;
-}
-.rc-form {
-  display:grid;
-  gap:9px;
-  padding:12px;
-  background:#f1f5f9;
-  border-radius:10px;
-}
-.rc-form input,.rc-form select,
-#rcStart {
-  padding:11px;
-  width:100%;
-  box-sizing:border-box;
-}
-.rc-form button {
-  padding:12px;
-  background:#123b69;
-  color:white;
-  border:0;
-  border-radius:6px;
-}
-.rc-legend {
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  margin:12px 0;
-}
-.rc-scroll {
-  overflow-x:auto;
-  max-width:100%;
-}
-#rcTable {
-  border-collapse:collapse;
-  font-size:12px;
-  white-space:nowrap;
-}
-#rcTable th,#rcTable td {
   border:1px solid #cbd5e1;
   padding:7px;
   text-align:center;
@@ -124,6 +24,7 @@ Hotel Management System
 }
 </style>
 
+<script>
 const rcRooms = [
   [201,"Super Deluxe"],[202,"Suite Room"],
   [203,"Suite Room"],[204,"Super Deluxe"],
@@ -223,7 +124,7 @@ function rcAddBooking() {
   document.getElementById("rcMobile").value="";
 
   rcRender();
-  alert("Booking saved successfully.");
+  alert("Booking saved successfully (Offline Mode).");
 }
 
 function rcRender() {
@@ -279,28 +180,4 @@ function rcRender() {
 }
 
 rcInit();
-            export default defineConfig({
-  base: '/DHUNVERSE-HOTEL-HMS/',
-
-    "homepage": "https://github.io",
-          // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCdUZAIrStix8lW_pAfJsoby_8f4hBdOTU",
-  authDomain: "dhunvers-hotel-hms.firebaseapp.com",
-  projectId: "dhunvers-hotel-hms",
-  storageBucket: "dhunvers-hotel-hms.firebasestorage.app",
-  messagingSenderId: "433794139142",
-  appId: "1:433794139142:web:5cdd3f885acbd461196f87",
-  measurementId: "G-XDPPY28SKK"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);  
+</script>
