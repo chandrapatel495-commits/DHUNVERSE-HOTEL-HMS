@@ -1,226 +1,350 @@
+html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DHUNVERSE HOTEL HMS</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f4fb;color:#202943}
-header{background:linear-gradient(120deg,#101b3b,#344e9b,#7654bd);color:white;padding:22px}
-header h2{margin:0;font-size:23px}
-header p{margin:7px 0 0;color:#dce5ff}
-.layout{display:flex;min-height:calc(100vh - 80px)}
-nav{width:225px;background:#172342;padding:12px;flex-shrink:0}
-nav button{display:block;width:100%;padding:12px;margin:4px 0;border:0;border-radius:9px;background:transparent;color:#dce5ff;text-align:left;font-size:14px;cursor:pointer}
-nav button:hover,nav button.active{background:#536ed1;color:white}
-main{flex:1;padding:22px;min-width:0}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.stat,.card{background:white;border-radius:13px;padding:17px;box-shadow:0 3px 15px #192c5010}
-.stat small{color:#78839b}
-.stat h2{font-size:27px;margin:10px 0 0;color:#344e9b}
-.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:18px}
-.shortcut{background:white;border:1px solid #e4e9f4;border-radius:12px;padding:17px 10px;text-align:center;cursor:pointer;color:#293c72;font-weight:bold;box-shadow:0 3px 12px #192c500b}
-.shortcut span{display:block;font-size:27px;margin-bottom:9px}
-.shortcut:hover{background:#eaf0ff;border-color:#8096ed}
-.section{display:none}
-.section.active{display:block}
-.card{margin-top:20px}
-input,select{padding:11px;border:1px solid #d7deeb;border-radius:8px;width:100%;margin:7px 0 12px;font-size:14px}
-.action{background:#405fba;color:white;border:0;border-radius:8px;padding:11px 17px;cursor:pointer;font-weight:bold}
-.action:hover{background:#2e4ca1}
-table{width:100%;border-collapse:collapse;background:white}
-td,th{padding:12px;border-bottom:1px solid #e8ebf2;text-align:left}
-
-/* Mobile & Tablet Responsive */
-@media(max-width:800px){
-.layout{display:block}
-nav{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px}
-nav button{font-size:13px;margin:0}
-main{padding:14px}
-.stats{grid-template-columns:repeat(2,1fr)}
-.shortcuts{grid-template-columns:repeat(2,1fr)}
-}
-</style>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHUNVERSE-HOTEL-HMS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8fafc;
+        }
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #1e3a8a;
+        }
+        .rc-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .rc-summary div {
+            background: #172554;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .rc-form {
+            display: grid;
+            gap: 9px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .rc-form input, .rc-form select, #rcStart {
+            padding: 11px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        .rc-form button {
+            padding: 12px;
+            background: #123b69;
+            color: white;
+            border: 0;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .rc-form button:hover {
+            background: #1e40af;
+        }
+        .rc-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+            font-weight: bold;
+        }
+        .rc-scroll {
+            overflow-x: auto;
+            max-width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        #rcTable {
+            border-collapse: collapse;
+            font-size: 13px;
+            white-space: nowrap;
+            width: 100%;
+        }
+        #rcTable th, #rcTable td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: center;
+        }
+        #rcTable th {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        #rcTable th:first-child {
+            position: sticky;
+            left: 0;
+            background: #e2e8f0;
+            z-index: 2;
+        }
+        #rcTable td:first-child {
+            position: sticky;
+            left: 0;
+            background: #f8fafc;
+            font-weight: bold;
+            z-index: 1;
+        }
+        .rc-free { background: #bbf7d0; color: #166534; }
+        .rc-booked { background: #fecaca; color: #991b1b; }
+        .rc-checkin { background: #bfdbfe; color: #1e40af; }
+        .rc-record {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            margin-bottom: 6px;
+            border-radius: 6px;
+        }
+    </style>
+    </head>
 <body>
-<header>
-<h2>DHUNVERSE HOTEL HMS</h2>
-<p>Smart Hotel Management System | Professional Edition</p>
-</header>
-<div class="layout">
-<nav id="sidebarNav">
-<button class="active" data-page="Dashboard" onclick="showPage('Dashboard',this)">🏠 Dashboard</button>
-<button data-page="Rooms" onclick="showPage('Rooms',this)">🛏️ Room Management</button>
-<button data-page="Reservations" onclick="showPage('Reservations',this)">📅 Reservations</button>
-<button data-page="Check-in" onclick="showPage('Check-in',this)">🔑 Check-in</button>
-<button data-page="Check-out" onclick="showPage('Check-out',this)">🚪 Check-out</button>
-<button data-page="Billing" onclick="showPage('Billing',this)">🧾 Billing & GST</button>
-<button data-page="POS" onclick="showPage('POS',this)">🍽️ Restaurant POS</button>
-<button data-page="Housekeeping" onclick="showPage('Housekeeping',this)">🧹 Housekeeping</button>
-<button data-page="KYC" onclick="showPage('KYC',this)">👤 Guest KYC / C-Form</button>
-<button data-page="Staff" onclick="showPage('Staff',this)">👥 Staff & Attendance</button>
-<button data-page="Reports" onclick="showPage('Reports',this)">📊 Reports</button>
-<button data-page="Security" onclick="showPage('Security',this)">🔐 Security & Backup</button>
-<button data-page="Settings" onclick="showPage('Settings',this)">⚙️ Hotel Settings</button>
-</nav>
-<main>
 
-<section id="Dashboard" class="section active">
-<h2>Hotel Dashboard</h2>
-<p>Welcome to DHUNVERSE HOTEL HMS</p>
-<div class="stats">
-<div class="stat"><small>Total Rooms</small><h2>24</h2></div>
-<div class="stat"><small>Occupied Rooms</small><h2>14</h2></div>
-<div class="stat"><small>Vacant Rooms</small><h2>10</h2></div>
-<div class="stat"><small>Occupancy</small><h2>58.3%</h2></div>
-</div>
-<h3>Quick Shortcuts</h3>
-<div class="shortcuts">
-<div class="shortcut" onclick="showPage('Reservations')"><span>📅</span>New Booking</div>
-<div class="shortcut" onclick="showPage('Check-in')"><span>🔑</span>Guest Check-in</div>
-<div class="shortcut" onclick="showPage('Check-out')"><span>🚪</span>Guest Check-out</div>
-<div class="shortcut" onclick="showPage('Billing')"><span>🧾</span>Billing</div>
-<div class="shortcut" onclick="showPage('Rooms')"><span>🛏️</span>Room Status</div>
-<div class="shortcut" onclick="showPage('POS')"><span>🍽️</span>Restaurant POS</div>
-<div class="shortcut" onclick="showPage('Housekeeping')"><span>🧹</span>Housekeeping</div>
-<div class="shortcut" onclick="showPage('Reports')"><span>📊</span>Reports</div>
-</div>
-<div class="card">
-<h3>System Notice</h3>
-<p>Demo version. Connect secure database before using real hotel records.</p>
-</div>
+<section id="RoomCalendar" class="page">
+  <h2>📅 30 Days Room Calendar</h2>
+
+  <div class="rc-summary">
+    <div>Total Rooms: <b>24</b></div>
+    <div>Super Deluxe: <b>10</b></div>
+    <div>Suite Room: <b>5</b></div>
+    <div>Business Executive: <b>9</b></div>
+  </div>
+
+  <h3>Add New Booking</h3>
+
+  <div class="rc-form">
+    <input id="rcGuest" placeholder="Guest Name">
+    <input id="rcMobile" placeholder="Mobile Number">
+    <select id="rcRoom"></select>
+
+    <label>Check-in Date</label>
+    <input type="date" id="rcIn">
+
+    <label>Check-out Date</label>
+    <input type="date" id="rcOut">
+
+    <button id="saveBookingBtn">Save Booking</button>
+  </div>
+
+  <h3>30 Days Availability</h3>
+
+  <label>Calendar Start Date</label>
+  <input type="date" id="rcStart">
+
+  <div class="rc-legend">
+    <span>🟩 Available</span>
+    <span>🟥 Booked</span>
+    <span>🟦 Check-in</span>
+  </div>
+
+  <div class="rc-scroll">
+    <table id="rcTable">
+      <thead id="rcHead"></thead>
+      <tbody id="rcBody"></tbody>
+    </table>
+  </div>
+
+  <h3>Booking Records</h3>
+  <div id="rcRecords">Loading live bookings...</div>
 </section>
 
-<section id="Rooms" class="section">
-<h2>Room Management</h2>
-<div class="card">
-<label>Room Number</label><input placeholder="Enter room number">
-<label>Room Type</label><select><option>Deluxe</option><option>Standard</option><option>Suite</option></select>
-<label>Status</label><select><option>Vacant</option><option>Occupied</option><option>Cleaning</option><option>Maintenance</option></select>
-<button class="action" onclick="alert('Database connection required to save rooms.')">Save Room</button>
-</div>
-</section>
+<script type="module">
+// पूरे और सही Firebase CDN लिंक्स
+import { initializeApp } from "https://gstatic.com";
+import { getAnalytics } from "https://gstatic.com";
+import { getFirestore, collection, addDoc, getDocs } from "https://gstatic.com";
 
-<section id="Reservations" class="section">
-<h2>Reservations</h2>
-<div class="card">
-<label>Guest Name</label><input placeholder="Guest name">
-<label>Mobile Number</label><input placeholder="Mobile number">
-<label>Check-in Date</label><input type="date">
-<label>Check-out Date</label><input type="date">
-<label>Room Number</label><input placeholder="Room number">
-<button class="action" onclick="alert('Database connection required to save booking.')">Create Booking</button>
-</div>
-</section>
+// सही कॉन्फ़िगरेशन (AuthDomain फिक्स किया गया)
+const firebaseConfig = {
+  apiKey: "AIzaSyCdUZAIrStix8lW_pAfJsoby_8f4hBdOTU",
+  authDomain: "dhunvers-hotel-hms.firebaseapp.com",
+  projectId: "dhunvers-hotel-hms",
+  storageBucket: "dhunvers-hotel-hms.firebasestorage.app",
+  messagingSenderId: "433794139142",
+  appId: "1:433794139142:web:5cdd3f885acbd461196f87",
+  measurementId: "G-XDPPY28SKK"
+};
 
-<section id="Check-in" class="section">
-<h2>Guest Check-in</h2>
-<div class="card">
-<input placeholder="Booking ID">
-<input placeholder="Guest Name">
-<input placeholder="Room Number">
-<button class="action" onclick="alert('Secure booking database required.')">Confirm Check-in</button>
-</div>
-</section>
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app); 
 
-<section id="Check-out" class="section">
-<h2>Guest Check-out</h2>
-<div class="card">
-<input placeholder="Room Number">
-<input placeholder="Booking ID">
-<button class="action" onclick="alert('Final bill and database verification required.')">Check-out</button>
-</div>
-</section>
+const rcRooms = [
+  [201,"Super Deluxe"],[202,"Suite Room"],
+  [203,"Suite Room"],[204,"Super Deluxe"],
+  [205,"Business Executive"],[206,"Business Executive"],
+  [207,"Business Executive"],[208,"Business Executive"],
+  [209,"Super Deluxe"],[210,"Super Deluxe"],
+  [211,"Super Deluxe"],[212,"Super Deluxe"],
+  [301,"Suite Room"],[302,"Suite Room"],
+  [303,"Suite Room"],[304,"Business Executive"],
+  [305,"Business Executive"],[306,"Business Executive"],
+  [307,"Business Executive"],[308,"Business Executive"],
+  [309,"Super Deluxe"],[310,"Super Deluxe"],
+  [311,"Super Deluxe"],[312,"Super Deluxe"]
+];
 
-<section id="Billing" class="section">
-<h2>Billing & GST</h2>
-<div class="card">
-<label>Guest Name</label><input placeholder="Guest name">
-<label>Amount</label><input type="number" id="amount" placeholder="Amount">
-<label>GST Rate (%)</label><select id="gst"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option></select>
-<button class="action" onclick="calculateBill()">Calculate Demo Bill</button>
-<h3 id="billResult">Total: ₹0.00</h3>
-<p>Demo calculation only. Verify applicable GST rules before invoicing.</p>
-</div>
-</section>
+let rcBookings = [];
+const rcToday = new Date();
 
-<section id="POS" class="section">
-<h2>Restaurant POS</h2>
-<div class="card">
-<input placeholder="Item Name">
-<input type="number" placeholder="Quantity">
-<input type="number" placeholder="Price">
-<button class="action" onclick="alert('POS database connection required.')">Add Order</button>
-</div>
-</section>
+const rcDate = d => {
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+};
 
-<section id="Housekeeping" class="section">
-<h2>Housekeeping</h2>
-<div class="card">
-<label>Room Number</label><input placeholder="Room number">
-<select><option>Cleaning Pending</option><option>Cleaning In Progress</option><option>Cleaned</option><option>Maintenance</option></select>
-<button class="action" onclick="alert('Database connection required.')">Update Status</button>
-</div>
-</section>
+async function loadBookingsFromFirebase() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "hotelBookings"));
+    rcBookings = [];
+    querySnapshot.forEach((doc) => {
+      rcBookings.push({ id: doc.id, ...doc.data() });
+    });
+    rcRender(); 
+  } catch (error) {
+    console.error("डेटाबेस लोड एरर: ", error);
+    document.getElementById("rcRecords").innerHTML = "Error loading bookings from Firebase.";
+  }
+}
 
-<section id="KYC" class="section">
-<h2>Guest KYC / C-Form</h2>
-<div class="card">
-<p>Guest verification and C-Form records will be connected to a secure database.</p>
-<p><b>Important:</b> Do not enter real Aadhaar, passport or guest details in this demo.</p>
-</div>
-</section>
+function rcInit() {
+  const roomSelect=document.getElementById("rcRoom");
+  if(!roomSelect) return;
 
-<section id="Staff" class="section">
-<h2>Staff & Attendance</h2>
-<div class="card">
-<input placeholder="Staff Name">
-<select><option>Front Office</option><option>Housekeeping</option><option>Restaurant</option><option>Accounts</option></select>
-<select><option>Present</option><option>Absent</option><option>Leave</option></select>
-<button class="action" onclick="alert('Database connection required.')">Save Demo Entry</button>
-</div>
-</section>
+  roomSelect.innerHTML=rcRooms.map(r =>
+    `<option value="${r[0]}">${r[0]} - ${r[1]}</option>`
+  ).join("");
 
-<section id="Reports" class="section">
-<h2>Reports & Analytics</h2>
-<div class="card">
-<label>Report Type</label>
-<select><option>Occupancy Report</option><option>Revenue Summary</option><option>GSTR-1 Data Export</option></select>
-<button class="action" onclick="alert('Reports engine requires system connection.')">Generate Report</button>
-</div>
-</section>
+  document.getElementById("rcStart").value=rcDate(rcToday);
+  document.getElementById("rcIn").value=rcDate(rcToday);
 
-<section id="Security" class="section">
-<h2>Security & Backup</h2>
-<div class="card">
-<p>Configure automated system snapshots and access privileges control.</p>
-<button class="action" onclick="alert('Backup engine requires local administrative access.')">Create Local Backup</button>
-</div>
-</section>
+  const tomorrow=new Date(rcToday);
+  tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById("rcOut").value=rcDate(tomorrow);
 
-<section id="Settings" class="section">
-<h2>Hotel Settings</h2>
-<div class="card">
-<label>Hotel Name</label><input value="DHUNVERSE HOTEL">
-<label>GSTIN</label><input placeholder="Enter 15-digit GSTIN">
-<button class="action" onclick="alert('Settings require administrative write permissions.')">Update Configurations</button>
-</div>
-</section>
+  loadBookingsFromFirebase();
+}
 
-</main>
-</div>
+async function rcAddBooking() {
+  const guest=document.getElementById("rcGuest").value.trim();
+  const mobile=document.getElementById("rcMobile").value.trim();
+  const room=Number(document.getElementById("rcRoom").value);
+  const checkin=document.getElementById("rcIn").value;
+  const checkout=document.getElementById("rcOut").value;
 
-<script>
-function showPage(pageId, buttonEl) {
-    // 1. सभी सेक्शन्स को छुपाएं
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(sec => sec.classList.remove('active'));
+  if(!guest || !checkin || !checkout) {
+    alert("Guest Name aur dates bhariye.");
+    return;
+  }
 
-    // 2. टारगेटेड (चुनें हुए) सेक्शन को दिखाएं
-    const activeSection = document.getElementById(pageId);
-    if(activeSection) {
-        activeSection.classList.add('active');
-    }
+  if(checkout<=checkin) {
+    alert("Check-out date, Check-in date ke baad honi chahiye.");
+    return;
+  }
 
-    
+  const conflict=rcBookings.some(b =>
+    b.room===room &&
+    checkin < b.checkout &&
+    checkout > b.checkin
+  );
+
+  if(conflict) {
+    alert("This room is already booked for these dates!");
+    return;
+  }
+
+  const newBookingData = {
+    guest,
+    mobile,
+    room,
+    checkin,
+    checkout,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    await addDoc(collection(db, "hotelBookings"), newBookingData);
+    document.getElementById("rcGuest").value="";
+    document.getElementById("rcMobile").value="";
+    alert("Booking saved successfully to Cloud Database!");
+    loadBookingsFromFirebase();
+  } catch (e) {
+    console.error("सेव एरर: ", e);
+    alert("Error saving booking. कृपया Firebase में Rules को 'true' करें।");
+  }
+}
+
+function rcRender() {
+  const startValue=document.getElementById("rcStart")?.value;
+  if(!startValue) return;
+
+  const start=new Date(startValue+"T12:00:00");
+  const dates=[];
+
+  for(let i=0;i<30;i++) {
+    const d=new Date(start);
+    d.setDate(d.getDate()+i);
+    dates.push(rcDate(d));
+  }
+
+  document.getElementById("rcHead").innerHTML =
+    "<tr><th>Room</th>" +
+    dates.map(d=>`<th>${d.slice(8,10)}<br>${d.slice(5,7)}</th>`).join("") +
+    "</tr>";
+
+  document.getElementById("rcBody").innerHTML =
+    rcRooms.map(r => {
+      const cells=dates.map(d => {
+        const booking=rcBookings.find(b =>
+          b.room===r[0] &&
+          d>=b.checkin &&
+          d<b.checkout
+        );
+
+        if(!booking) return '<td class="rc-free">Free</td>';
+        const cls=d===booking.checkin ? "rc-checkin" : "rc-booked";
+        return `<td class="${cls}" title="${booking.guest}">${d===booking.checkin ? "IN" : "B"}</td>`;
+      }).join("");
+
+      return `<tr><td>${r[0]}<br><small>${r[1]}</small></td>${cells}</tr>`;
+    }).join("");
+
+  document.getElementById("rcRecords").innerHTML =
+    rcBookings.length
+    ? rcBookings.map(b => `
+      <div class="rc-record">
+        <b>Room ${b.room}</b> - ${b.guest}<br>
+        Mobile: ${b.mobile || "-"}<br>
+        📅 ${b.checkin} to ${b.checkout}
+      </div>
+    `).join("")
+    : "No bookings added yet.";
+}
+
+document.getElementById("saveBookingBtn")?.addEventListener("click", rcAddBooking);
+document.getElementById("rcStart")?.addEventListener("change", rcRender);
+
+rcInit();
+</script>
+</body>
+</html>
