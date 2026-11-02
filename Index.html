@@ -1,183 +1,244 @@
-  border:1px solid #cbd5e1;
-  padding:7px;
-  text-align:center;
-}
-#rcTable th:first-child {
-  position:sticky;
-  left:0;
-  background:#e2e8f0;
-  z-index:2;
-}
-#rcTable td:first-child {
-  position:sticky;
-  left:0;
-  background:#f8fafc;
-  font-weight:bold;
-  z-index:1;
-}
-.rc-free {background:#bbf7d0;}
-.rc-booked {background:#fecaca;}
-.rc-checkin {background:#bfdbfe;}
-.rc-record {
-  padding:10px;
-  border-bottom:1px solid #ddd;
-}
-</style>
+    .rc-legend .Booked { background: #fecaca; }
+    .rc-legend .Check-in { background: #bfdbfe; }
+    .rc-record {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      background: white;
+      margin-bottom: 5px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
 
-<script>
-const rcRooms = [
-  [201,"Super Deluxe"],[202,"Suite Room"],
-  [203,"Suite Room"],[204,"Super Deluxe"],
-  [205,"Business Executive"],[206,"Business Executive"],
-  [207,"Business Executive"],[208,"Business Executive"],
-  [209,"Super Deluxe"],[210,"Super Deluxe"],
-  [211,"Super Deluxe"],[212,"Super Deluxe"],
-  [301,"Suite Room"],[302,"Suite Room"],
-  [303,"Suite Room"],[304,"Business Executive"],
-  [305,"Business Executive"],[306,"Business Executive"],
-  [307,"Business Executive"],[308,"Business Executive"],
-  [309,"Super Deluxe"],[310,"Super Deluxe"],
-  [311,"Super Deluxe"],[312,"Super Deluxe"]
-];
+  <!-- # DHUNVERSE-HOTEL-HMS -->
+  <!-- Hotel Management System -->
 
-let rcBookings = [];
-try {
-  rcBookings = JSON.parse(
-    localStorage.getItem("hotelRoomCalendarBookings") || "[]"
-  );
-} catch(e) {
-  rcBookings = [];
-}
+  <section id="RoomCalendar" class="page">
+    <h2>📅 30 Days Room Calendar</h2>
 
-const rcToday = new Date();
-const rcDate = d => {
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,"0");
-  const day=String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
-};
+    <div class="rc-summary">
+      <div>Total Rooms: <b>24</b></div>
+      <div>Super Deluxe: <b>12</b></div>
+      <div>Suite Room: <b>5</b></div>
+      <div>Business Executive: <b>7</b></div>
+    </div>
 
-function rcInit() {
-  const roomSelect=document.getElementById("rcRoom");
-  if(!roomSelect) return;
+    <h3>➕ Add New Booking</h3>
+    <div class="rc-form">
+      <input id="rcGuest" placeholder="Guest Name" type="text">
+      <input id="rcMobile" placeholder="Mobile Number" type="tel">
+      
+      <label for="rcRoom">Select Room</label>
+      <select id="rcRoom"></select>
 
-  roomSelect.innerHTML=rcRooms.map(r =>
-    `<option value="${r[0]}">${r[0]} - ${r[1]}</option>`
-  ).join("");
+      <label>Check-in Date</label>
+      <input type="date" id="rcIn">
 
-  document.getElementById("rcStart").value=rcDate(rcToday);
-  document.getElementById("rcIn").value=rcDate(rcToday);
+      <label>Check-out Date</label>
+      <input type="date" id="rcOut">
 
-  const tomorrow=new Date(rcToday);
-  tomorrow.setDate(tomorrow.getDate()+1);
-  document.getElementById("rcOut").value=rcDate(tomorrow);
+      <button onclick="rcAddBooking()">Save Booking</button>
+    </div>
 
-  rcRender();
-}
+    <h3>🕒 30 Days Availability</h3>
+    <label>Calendar Start Date</label>
+    <input type="date" id="rcStart" onchange="rcRender()">
 
-function rcSave() {
-  localStorage.setItem(
-    "hotelRoomCalendarBookings",
-    JSON.stringify(rcBookings)
-  );
-}
+    <div class="rc-legend" style="margin: 15px 0;">
+      <span class="Available">Available</span>
+      <span class="Booked">Booked</span>
+      <span class="Check-in">Check-in</span>
+    </div>
 
-function rcAddBooking() {
-  const guest=document.getElementById("rcGuest").value.trim();
-  const mobile=document.getElementById("rcMobile").value.trim();
-  const room=Number(document.getElementById("rcRoom").value);
-  const checkin=document.getElementById("rcIn").value;
-  const checkout=document.getElementById("rcOut").value;
+    <div class="rc-scroll">
+      <table id="rcTable">
+        <thead id="rcHead"></thead>
+        <tbody id="rcBody"></tbody>
+      </table>
+    </div>
 
-  if(!guest || !checkin || !checkout) {
-    alert("Guest Name aur dates bhariye.");
-    return;
-  }
+    <h3>📋 Booking Records</h3>
+    <div id="rcRecords"></div>
+  </section>
 
-  if(checkout<=checkin) {
-    alert("Check-out date, Check-in date ke baad honi chahiye.");
-    return;
-  }
+  <!-- पूरी तरह ऑफ़लाइन काम करने वाली जावास्क्रिप्ट स्क्रिप्ट -->
+  <script>
+    // कमरे (Rooms) की पूरी लिस्ट
+    const rcRooms = [
+      [201,"Super Deluxe"],[202,"Suite Room"],
+      [203,"Suite Room"],[204,"Super Deluxe"],
+      [205,"Business Executive"],[206,"Business Executive"],
+      [207,"Business Executive"],[208,"Business Executive"],
+      [209,"Super Deluxe"],[210,"Super Deluxe"],
+      [211,"Super Deluxe"],[212,"Super Deluxe"],
+      [301,"Suite Room"],[302,"Suite Room"],
+      [303,"Suite Room"],[304,"Business Executive"],
+      [305,"Business Executive"],[306,"Business Executive"],
+      [307,"Business Executive"],[308,"Business Executive"],
+      [309,"Super Deluxe"],[310,"Super Deluxe"],
+      [311,"Super Deluxe"],[312,"Super Deluxe"]
+    ];
 
-  const conflict=rcBookings.some(b =>
-    b.room===room &&
-    checkin < b.checkout &&
-    checkout > b.checkin
-  );
+    // LocalStorage से पुराना बुकिंग डेटा लोड करना
+    let rcBookings = [];
+    try {
+      rcBookings = JSON.parse(
+        localStorage.getItem("hotelRoomCalendarBookings") || "[]"
+      );
+    } catch(e) {
+      rcBookings = [];
+    }
 
-  if(conflict) {
-    alert("This room is already booked for these dates!");
-    return;
-  }
+    const rcToday = new Date();
+    const rcDate = d => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    };
 
-  rcBookings.push({
-    id:Date.now(),
-    guest,
-    mobile,
-    room,
-    checkin,
-    checkout
-  });
+    // पेज लोड होते ही ड्रॉपडाउन और डिफ़ॉल्ट डेट्स सेटअप करना
+    function rcInit() {
+      const roomSelect = document.getElementById("rcRoom");
+      if(roomSelect) {
+        roomSelect.innerHTML = rcRooms.map(r =>
+          `<option value="${r[0]}">${r[0]} - ${r[1]}</option>`
+        ).join("");
+      }
 
-  rcSave();
-  document.getElementById("rcGuest").value="";
-  document.getElementById("rcMobile").value="";
+      if(document.getElementById("rcStart")) document.getElementById("rcStart").value = rcDate(rcToday);
+      if(document.getElementById("rcIn")) document.getElementById("rcIn").value = rcDate(rcToday);
 
-  rcRender();
-  alert("Booking saved successfully (Offline Mode).");
-}
+      const tomorrow = new Date(rcToday);
+      tomorrow.setDate(tomorrow.getDate()+1);
+      if(document.getElementById("rcOut")) document.getElementById("rcOut").value = rcDate(tomorrow);
 
-function rcRender() {
-  const startValue=document.getElementById("rcStart")?.value;
-  if(!startValue) return;
+      rcRender();
+    }
 
-  const start=new Date(startValue+"T12:00:00");
-  const dates=[];
+    // ब्राउज़र की लोकल मेमोरी में डेटा सेव करने के लिए
+    function rcSave() {
+      localStorage.setItem(
+        "hotelRoomCalendarBookings",
+        JSON.stringify(rcBookings)
+      );
+    }
 
-  for(let i=0;i<30;i++) {
-    const d=new Date(start);
-    d.setDate(d.getDate()+i);
-    dates.push(rcDate(d));
-  }
+    // नई बुकिंग जोड़ने का मुख्य फंक्शन
+    function rcAddBooking() {
+      const guestInput = document.getElementById("rcGuest");
+      const mobileInput = document.getElementById("rcMobile");
+      const roomSelect = document.getElementById("rcRoom");
+      const checkinInput = document.getElementById("rcIn");
+      const checkoutInput = document.getElementById("rcOut");
 
-  document.getElementById("rcHead").innerHTML =
-    "<tr><th>Room</th>" +
-    dates.map(d=>`<th>${d.slice(8,10)}<br>${d.slice(5,7)}</th>`).join("") +
-    "</tr>";
+      const guest = guestInput ? guestInput.value.trim() : "";
+      const mobile = mobileInput ? mobileInput.value.trim() : "";
+      const room = roomSelect ? Number(roomSelect.value) : 0;
+      const checkin = checkinInput ? checkinInput.value : "";
+      const checkout = checkoutInput ? checkoutInput.value : "";
 
-  document.getElementById("rcBody").innerHTML =
-    rcRooms.map(r => {
-      const cells=dates.map(d => {
-        const booking=rcBookings.find(b =>
-          b.room===r[0] &&
-          d>=b.checkin &&
-          d<b.checkout
-        );
+      if(!guest || !room || !checkin || !checkout) {
+        alert("कृपया Guest Name, Room और तारीखें सही से भरें।");
+        return;
+      }
 
-        if(!booking) return '<td class="rc-free">Free</td>';
+      if(checkout <= checkin) {
+        alert("Check-out तारीख, Check-in तारीख के बाद की होनी चाहिए।");
+        return;
+      }
 
-        const cls=d===booking.checkin
-          ? "rc-checkin" : "rc-booked";
+      // ओवरलैपिंग/डबल बुकिंग रोकना
+      const conflict = rcBookings.some(b =>
+        b.room === room &&
+        checkin < b.checkout &&
+        checkout > b.checkin
+      );
 
-        return `<td class="${cls}" title="${booking.guest}">
-          ${d===booking.checkin ? "IN" : "B"}
-        </td>`;
-      }).join("");
+      if(conflict) {
+        alert("यह कमरा इन तारीखों के लिए पहले से ही बुक है!");
+        return;
+      }
 
-      return `<tr><td>${r[0]}<br>${r[1]}</td>${cells}</tr>`;
-    }).join("");
+      // डेटा को लिस्ट में जोड़ना
+      rcBookings.push({
+        id: Date.now(),
+        guest,
+        mobile,
+        room,
+        checkin,
+        checkout
+      });
 
-  document.getElementById("rcRecords").innerHTML =
-    rcBookings.length
-    ? rcBookings.map(b => `
-      <div class="rc-record">
-        <b>Room ${b.room}</b> - ${b.guest}<br>
-        Mobile: ${b.mobile || "-"}<br>
-        ${b.checkin} to ${b.checkout}
-      </div>
-    `).join("")
-    : "No bookings added yet.";
-}
+      rcSave(); // लोकल स्टोरेज में सेव करें
 
-rcInit();
-</script>
+      // इनपुट बॉक्स खाली करना
+      if(guestInput) guestInput.value = "";
+      if(mobileInput) mobileInput.value = "";
+
+      rcRender(); // कैलेंडर और लिस्ट को अपडेट करना
+      alert("🎉 बुकिंग सफलतापूर्वक ऑफ़लाइन (LocalStorage) सेव कर ली गई है!");
+    }
+
+    // कैलेंडर ग्रिड और रिकॉर्ड्स रेंडर करना
+    function rcRender() {
+      const startElement = document.getElementById("rcStart");
+      const startValue = startElement ? startElement.value : rcDate(rcToday);
+      if(!startValue) return;
+
+      const start = new Date(startValue + "T12:00:00");
+      const dates = [];
+
+      // 30 दिनों के लिए तारीखें बनाना
+      for(let i=0; i<30; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        dates.push(rcDate(d));
+      }
+
+      // टेबल हेडर बनाना
+      const headEl = document.getElementById("rcHead");
+      if(headEl) {
+        headEl.innerHTML =
+          "<tr><th>Room</th>" +
+          dates.map(d => `<th>${d.slice(8,10)}<br>${d.slice(5,7)}</th>`).join("") +
+          "</tr>";
+      }
+
+      // टेबल बॉडी (कमरे और उनकी बुकिंग स्थिति) बनाना
+      const bodyEl = document.getElementById("rcBody");
+      if(bodyEl) {
+        bodyEl.innerHTML =
+          rcRooms.map(r => {
+            const cells = dates.map(d => {
+              const booking = rcBookings.find(b =>
+                b.room === r[0] &&
+                d >= b.checkin &&
+                d < b.checkout
+              );
+
+              if(!booking) return '<td class="rc-free">Free</td>';
+
+              const cls = d === booking.checkin ? "rc-checkin" : "rc-booked";
+
+              return `<td class="${cls}" title="${booking.guest}">
+                ${d === booking.checkin ? "IN" : "B"}
+              </td>`;
+            }).join("");
+
+            return `<tr><td>${r[0]}<br><small style="color:#64748b">${r[1]}</small></td>${cells}</tr>`;
+          }).join("");
+      }
+
+      // नीचे बुकिंग की लिस्ट दिखाना
+      const recordsEl = document.getElementById("rcRecords");
+      if(recordsEl) {
+        recordsEl.innerHTML =
+          rcBookings.length
+          ? rcBookings.map(b => `
+            <div class="rc-record">
+              <b>🚪 Room ${b.room}</b> - 👤 ${b.guest}<br>
+              📱 Mobile: ${b.mobile || "-"}<br>
+              📅 ${b.checkin} से ${b.checkout}
+                                </div>
