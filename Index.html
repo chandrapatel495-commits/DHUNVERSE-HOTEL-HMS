@@ -1,0 +1,282 @@
+# DHUNVERSE-HOTEL-HMS
+Hotel Management System
+
+<section id="RoomCalendar" class="page">
+  <h2>📅 30 Days Room Calendar</h2>
+
+  <div class="rc-summary">
+    <div>Total Rooms: <b>24</b></div>
+    <div>Super Deluxe: <b>10</b></div>
+    <div>Suite Room: <b>5</b></div>
+    <div>Business Executive: <b>9</b></div>
+  </div>
+
+  <h3>Add New Booking</h3>
+
+  <div class="rc-form">
+    <input id="rcGuest" placeholder="Guest Name">
+    <input id="rcMobile" placeholder="Mobile Number">
+    <select id="rcRoom"></select>
+
+    <label>Check-in Date</label>
+    <input type="date" id="rcIn">
+
+    <label>Check-out Date</label>
+    <input type="date" id="rcOut">
+
+    <button onclick="rcAddBooking()">Save Booking</button>
+  </div>
+
+  <h3>30 Days Availability</h3>
+
+  <label>Calendar Start Date</label>
+  <input type="date" id="rcStart" onchange="rcRender()">
+
+  <div class="rc-legend">
+    <span>🟩 Available</span>
+    <span>🟥 Booked</span>
+    <span>🟦 Check-in</span>
+  </div>
+
+  <div class="rc-scroll">
+    <table id="rcTable">
+      <thead id="rcHead"></thead>
+      <tbody id="rcBody"></tbody>
+    </table>
+  </div>
+
+  <h3>Booking Records</h3>
+  <div id="rcRecords"></div>
+</section>
+
+<style>
+.rc-summary {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin:12px 0;
+}
+.rc-summary div {
+  background:#172554;
+  color:white;
+  padding:12px;
+  border-radius:8px;
+}
+.rc-form {
+  display:grid;
+  gap:9px;
+  padding:12px;
+  background:#f1f5f9;
+  border-radius:10px;
+}
+.rc-form input,.rc-form select,
+#rcStart {
+  padding:11px;
+  width:100%;
+  box-sizing:border-box;
+}
+.rc-form button {
+  padding:12px;
+  background:#123b69;
+  color:white;
+  border:0;
+  border-radius:6px;
+}
+.rc-legend {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:12px 0;
+}
+.rc-scroll {
+  overflow-x:auto;
+  max-width:100%;
+}
+#rcTable {
+  border-collapse:collapse;
+  font-size:12px;
+  white-space:nowrap;
+}
+#rcTable th,#rcTable td {
+  border:1px solid #cbd5e1;
+  padding:7px;
+  text-align:center;
+}
+#rcTable th:first-child {
+  position:sticky;
+  left:0;
+  background:#e2e8f0;
+  z-index:2;
+}
+#rcTable td:first-child {
+  position:sticky;
+  left:0;
+  background:#f8fafc;
+  font-weight:bold;
+  z-index:1;
+}
+.rc-free {background:#bbf7d0;}
+.rc-booked {background:#fecaca;}
+.rc-checkin {background:#bfdbfe;}
+.rc-record {
+  padding:10px;
+  border-bottom:1px solid #ddd;
+}
+</style>
+
+const rcRooms = [
+  [201,"Super Deluxe"],[202,"Suite Room"],
+  [203,"Suite Room"],[204,"Super Deluxe"],
+  [205,"Business Executive"],[206,"Business Executive"],
+  [207,"Business Executive"],[208,"Business Executive"],
+  [209,"Super Deluxe"],[210,"Super Deluxe"],
+  [211,"Super Deluxe"],[212,"Super Deluxe"],
+  [301,"Suite Room"],[302,"Suite Room"],
+  [303,"Suite Room"],[304,"Business Executive"],
+  [305,"Business Executive"],[306,"Business Executive"],
+  [307,"Business Executive"],[308,"Business Executive"],
+  [309,"Super Deluxe"],[310,"Super Deluxe"],
+  [311,"Super Deluxe"],[312,"Super Deluxe"]
+];
+
+let rcBookings = [];
+try {
+  rcBookings = JSON.parse(
+    localStorage.getItem("hotelRoomCalendarBookings") || "[]"
+  );
+} catch(e) {
+  rcBookings = [];
+}
+
+const rcToday = new Date();
+const rcDate = d => {
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+};
+
+function rcInit() {
+  const roomSelect=document.getElementById("rcRoom");
+  if(!roomSelect) return;
+
+  roomSelect.innerHTML=rcRooms.map(r =>
+    `<option value="${r[0]}">${r[0]} - ${r[1]}</option>`
+  ).join("");
+
+  document.getElementById("rcStart").value=rcDate(rcToday);
+  document.getElementById("rcIn").value=rcDate(rcToday);
+
+  const tomorrow=new Date(rcToday);
+  tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById("rcOut").value=rcDate(tomorrow);
+
+  rcRender();
+}
+
+function rcSave() {
+  localStorage.setItem(
+    "hotelRoomCalendarBookings",
+    JSON.stringify(rcBookings)
+  );
+}
+
+function rcAddBooking() {
+  const guest=document.getElementById("rcGuest").value.trim();
+  const mobile=document.getElementById("rcMobile").value.trim();
+  const room=Number(document.getElementById("rcRoom").value);
+  const checkin=document.getElementById("rcIn").value;
+  const checkout=document.getElementById("rcOut").value;
+
+  if(!guest || !checkin || !checkout) {
+    alert("Guest Name aur dates bhariye.");
+    return;
+  }
+
+  if(checkout<=checkin) {
+    alert("Check-out date, Check-in date ke baad honi chahiye.");
+    return;
+  }
+
+  const conflict=rcBookings.some(b =>
+    b.room===room &&
+    checkin < b.checkout &&
+    checkout > b.checkin
+  );
+
+  if(conflict) {
+    alert("This room is already booked for these dates!");
+    return;
+  }
+
+  rcBookings.push({
+    id:Date.now(),
+    guest,
+    mobile,
+    room,
+    checkin,
+    checkout
+  });
+
+  rcSave();
+  document.getElementById("rcGuest").value="";
+  document.getElementById("rcMobile").value="";
+
+  rcRender();
+  alert("Booking saved successfully.");
+}
+
+function rcRender() {
+  const startValue=document.getElementById("rcStart")?.value;
+  if(!startValue) return;
+
+  const start=new Date(startValue+"T12:00:00");
+  const dates=[];
+
+  for(let i=0;i<30;i++) {
+    const d=new Date(start);
+    d.setDate(d.getDate()+i);
+    dates.push(rcDate(d));
+  }
+
+  document.getElementById("rcHead").innerHTML =
+    "<tr><th>Room</th>" +
+    dates.map(d=>`<th>${d.slice(8,10)}<br>${d.slice(5,7)}</th>`).join("") +
+    "</tr>";
+
+  document.getElementById("rcBody").innerHTML =
+    rcRooms.map(r => {
+      const cells=dates.map(d => {
+        const booking=rcBookings.find(b =>
+          b.room===r[0] &&
+          d>=b.checkin &&
+          d<b.checkout
+        );
+
+        if(!booking) return '<td class="rc-free">Free</td>';
+
+        const cls=d===booking.checkin
+          ? "rc-checkin" : "rc-booked";
+
+        return `<td class="${cls}" title="${booking.guest}">
+          ${d===booking.checkin ? "IN" : "B"}
+        </td>`;
+      }).join("");
+
+      return `<tr><td>${r[0]}<br>${r[1]}</td>${cells}</tr>`;
+    }).join("");
+
+  document.getElementById("rcRecords").innerHTML =
+    rcBookings.length
+    ? rcBookings.map(b => `
+      <div class="rc-record">
+        <b>Room ${b.room}</b> - ${b.guest}<br>
+        Mobile: ${b.mobile || "-"}<br>
+        ${b.checkin} to ${b.checkout}
+      </div>
+    `).join("")
+    : "No bookings added yet.";
+}
+
+rcInit();
+            
