@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@ header{background:linear-gradient(120deg,#101b3b,#344e9b,#7654bd);color:white;pa
 header h2{margin:0;font-size:23px}
 header p{margin:7px 0 0;color:#dce5ff}
 .layout{display:flex;min-height:calc(100vh - 80px)}
-nav{width:225px;background:#172342;padding:12px}
+nav{width:225px;background:#172342;padding:12px;flex-shrink:0}
 nav button{display:block;width:100%;padding:12px;margin:4px 0;border:0;border-radius:9px;background:transparent;color:#dce5ff;text-align:left;font-size:14px;cursor:pointer}
 nav button:hover,nav button.active{background:#536ed1;color:white}
 main{flex:1;padding:22px;min-width:0}
@@ -27,14 +26,17 @@ main{flex:1;padding:22px;min-width:0}
 .section{display:none}
 .section.active{display:block}
 .card{margin-top:20px}
-input,select{padding:11px;border:1px solid #d7deeb;border-radius:8px;width:100%;margin:7px 0 12px}
-.action{background:#405fba;color:white;border:0;border-radius:8px;padding:11px 17px;cursor:pointer}
+input,select{padding:11px;border:1px solid #d7deeb;border-radius:8px;width:100%;margin:7px 0 12px;font-size:14px}
+.action{background:#405fba;color:white;border:0;border-radius:8px;padding:11px 17px;cursor:pointer;font-weight:bold}
+.action:hover{background:#2e4ca1}
 table{width:100%;border-collapse:collapse;background:white}
 td,th{padding:12px;border-bottom:1px solid #e8ebf2;text-align:left}
+
+/* Mobile & Tablet Responsive */
 @media(max-width:800px){
 .layout{display:block}
-nav{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}
-nav button{font-size:12px}
+nav{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px}
+nav button{font-size:13px;margin:0}
 main{padding:14px}
 .stats{grid-template-columns:repeat(2,1fr)}
 .shortcuts{grid-template-columns:repeat(2,1fr)}
@@ -47,20 +49,20 @@ main{padding:14px}
 <p>Smart Hotel Management System | Professional Edition</p>
 </header>
 <div class="layout">
-<nav>
-<button class="active" onclick="showPage('Dashboard',this)">🏠 Dashboard</button>
-<button onclick="showPage('Rooms',this)">🛏️ Room Management</button>
-<button onclick="showPage('Reservations',this)">📅 Reservations</button>
-<button onclick="showPage('Check-in',this)">🔑 Check-in</button>
-<button onclick="showPage('Check-out',this)">🚪 Check-out</button>
-<button onclick="showPage('Billing',this)">🧾 Billing & GST</button>
-<button onclick="showPage('POS',this)">🍽️ Restaurant POS</button>
-<button onclick="showPage('Housekeeping',this)">🧹 Housekeeping</button>
-<button onclick="showPage('KYC',this)">👤 Guest KYC / C-Form</button>
-<button onclick="showPage('Staff',this)">👥 Staff & Attendance</button>
-<button onclick="showPage('Reports',this)">📊 Reports</button>
-<button onclick="showPage('Security',this)">🔐 Security & Backup</button>
-<button onclick="showPage('Settings',this)">⚙️ Hotel Settings</button>
+<nav id="sidebarNav">
+<button class="active" data-page="Dashboard" onclick="showPage('Dashboard',this)">🏠 Dashboard</button>
+<button data-page="Rooms" onclick="showPage('Rooms',this)">🛏️ Room Management</button>
+<button data-page="Reservations" onclick="showPage('Reservations',this)">📅 Reservations</button>
+<button data-page="Check-in" onclick="showPage('Check-in',this)">🔑 Check-in</button>
+<button data-page="Check-out" onclick="showPage('Check-out',this)">🚪 Check-out</button>
+<button data-page="Billing" onclick="showPage('Billing',this)">🧾 Billing & GST</button>
+<button data-page="POS" onclick="showPage('POS',this)">🍽️ Restaurant POS</button>
+<button data-page="Housekeeping" onclick="showPage('Housekeeping',this)">🧹 Housekeeping</button>
+<button data-page="KYC" onclick="showPage('KYC',this)">👤 Guest KYC / C-Form</button>
+<button data-page="Staff" onclick="showPage('Staff',this)">👥 Staff & Attendance</button>
+<button data-page="Reports" onclick="showPage('Reports',this)">📊 Reports</button>
+<button data-page="Security" onclick="showPage('Security',this)">🔐 Security & Backup</button>
+<button data-page="Settings" onclick="showPage('Settings',this)">⚙️ Hotel Settings</button>
 </nav>
 <main>
 
@@ -181,49 +183,44 @@ main{padding:14px}
 </section>
 
 <section id="Reports" class="section">
-<h2>Reports</h2>
+<h2>Reports & Analytics</h2>
 <div class="card">
-<p>Daily Revenue, Occupancy, ADR, RevPAR, GST and Payment Reports.</p>
-<p>Reports will calculate from verified database transactions after setup.</p>
+<label>Report Type</label>
+<select><option>Occupancy Report</option><option>Revenue Summary</option><option>GSTR-1 Data Export</option></select>
+<button class="action" onclick="alert('Reports engine requires system connection.')">Generate Report</button>
 </div>
 </section>
 
 <section id="Security" class="section">
 <h2>Security & Backup</h2>
 <div class="card">
-<p>Database Backup, Audit Log, Role Permissions and Restore System.</p>
-<p>These features require secure backend setup. This page is only a demo.</p>
+<p>Configure automated system snapshots and access privileges control.</p>
+<button class="action" onclick="alert('Backup engine requires local administrative access.')">Create Local Backup</button>
 </div>
 </section>
 
 <section id="Settings" class="section">
 <h2>Hotel Settings</h2>
 <div class="card">
-<input placeholder="Hotel Name">
-<input placeholder="Hotel Address">
-<input placeholder="GSTIN">
-<input placeholder="Hotel Contact">
-<button class="action" onclick="alert('Database connection required to save settings.')">Save Settings</button>
+<label>Hotel Name</label><input value="DHUNVERSE HOTEL">
+<label>GSTIN</label><input placeholder="Enter 15-digit GSTIN">
+<button class="action" onclick="alert('Settings require administrative write permissions.')">Update Configurations</button>
 </div>
 </section>
+
 </main>
 </div>
+
 <script>
-function showPage(id,btn){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-if(btn)btn.classList.add('active');
-}
-function calculateBill(){
-let amount=Number(document.getElementById('amount').value)||0;
-let gst=Number(document.getElementById('gst').value)||0;
-let total=amount+(amount*gst/100);
-document.getElementById('billResult').innerText='Total: ₹'+total.toFixed(2);
-}
-</script>
-</body>
-</html>
-if (!databaseConnected) {
-    alert("Secure booking database required.");
-}
+function showPage(pageId, buttonEl) {
+    // 1. सभी सेक्शन्स को छुपाएं
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(sec => sec.classList.remove('active'));
+
+    // 2. टारगेटेड (चुनें हुए) सेक्शन को दिखाएं
+    const activeSection = document.getElementById(pageId);
+    if(activeSection) {
+        activeSection.classList.add('active');
+    }
+
+    
