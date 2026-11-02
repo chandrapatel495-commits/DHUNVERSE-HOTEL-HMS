@@ -1,205 +1,226 @@
 
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DHUNVERSE HOTEL HMS</title>
 <style>
-body{font-family:Arial, sans-serif;background:#f1f4f9;margin:0;color:#17243a}
-header{background:#14243a;color:white;padding:22px;text-align:center}
-nav{background:white;padding:15px;text-align:center;box-shadow: 0 2px 4px rgba(0,0,0,0.1)}
-nav a{margin: 0 15px; text-decoration: none; color: #2459a6; font-weight: bold; cursor: pointer;}
-nav a:hover{color: #14243a;}
-main{padding:20px; max-width: 800px; margin: 0 auto;}
-h1{font-size:24px; color: #14243a}
-.tab-content{display: none;}
-.tab-content.active{display: block;}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px; margin-bottom: 20px;}
-.card{background:white;padding:22px;border-radius:12px;box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
-.card h2{color:#2459a6; margin: 0 0 10px 0;}
-.form-group{margin-bottom: 15px;}
-.form-group label{display: block; margin-bottom: 5px; font-weight: bold;}
-.form-group input, .form-group select{width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;}
-button{background: #2459a6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;}
-button:hover{background: #14243a;}
-table{width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
-th, td{padding: 12px; text-align: left; border-bottom: 1px solid #eee;}
-th{background: #2459a6; color: white;}
-.status-badge{padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;}
-.status-vacant{background: #e6f4ea; color: #137333;}
-.status-occupied{background: #fce8e6; color: #c5221f;}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f4fb;color:#202943}
+header{background:linear-gradient(120deg,#101b3b,#344e9b,#7654bd);color:white;padding:22px}
+header h2{margin:0;font-size:23px}
+header p{margin:7px 0 0;color:#dce5ff}
+.layout{display:flex;min-height:calc(100vh - 80px)}
+nav{width:225px;background:#172342;padding:12px}
+nav button{display:block;width:100%;padding:12px;margin:4px 0;border:0;border-radius:9px;background:transparent;color:#dce5ff;text-align:left;font-size:14px;cursor:pointer}
+nav button:hover,nav button.active{background:#536ed1;color:white}
+main{flex:1;padding:22px;min-width:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat,.card{background:white;border-radius:13px;padding:17px;box-shadow:0 3px 15px #192c5010}
+.stat small{color:#78839b}
+.stat h2{font-size:27px;margin:10px 0 0;color:#344e9b}
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:18px}
+.shortcut{background:white;border:1px solid #e4e9f4;border-radius:12px;padding:17px 10px;text-align:center;cursor:pointer;color:#293c72;font-weight:bold;box-shadow:0 3px 12px #192c500b}
+.shortcut span{display:block;font-size:27px;margin-bottom:9px}
+.shortcut:hover{background:#eaf0ff;border-color:#8096ed}
+.section{display:none}
+.section.active{display:block}
+.card{margin-top:20px}
+input,select{padding:11px;border:1px solid #d7deeb;border-radius:8px;width:100%;margin:7px 0 12px}
+.action{background:#405fba;color:white;border:0;border-radius:8px;padding:11px 17px;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:white}
+td,th{padding:12px;border-bottom:1px solid #e8ebf2;text-align:left}
+@media(max-width:800px){
+.layout{display:block}
+nav{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}
+nav button{font-size:12px}
+main{padding:14px}
+.stats{grid-template-columns:repeat(2,1fr)}
+.shortcuts{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
-
 <header>
 <h2>DHUNVERSE HOTEL HMS</h2>
-<p>Hotel Management System</p>
+<p>Smart Hotel Management System | Professional Edition</p>
 </header>
-
+<div class="layout">
 <nav>
-    <a onclick="switchTab('dashboard')">Dashboard</a> | 
-    <a onclick="switchTab('rooms')">Rooms</a> | 
-    <a onclick="switchTab('reservations')">Reservations</a> | 
-    <a onclick="switchTab('billing')">Billing</a>
+<button class="active" onclick="showPage('Dashboard',this)">🏠 Dashboard</button>
+<button onclick="showPage('Rooms',this)">🛏️ Room Management</button>
+<button onclick="showPage('Reservations',this)">📅 Reservations</button>
+<button onclick="showPage('Check-in',this)">🔑 Check-in</button>
+<button onclick="showPage('Check-out',this)">🚪 Check-out</button>
+<button onclick="showPage('Billing',this)">🧾 Billing & GST</button>
+<button onclick="showPage('POS',this)">🍽️ Restaurant POS</button>
+<button onclick="showPage('Housekeeping',this)">🧹 Housekeeping</button>
+<button onclick="showPage('KYC',this)">👤 Guest KYC / C-Form</button>
+<button onclick="showPage('Staff',this)">👥 Staff & Attendance</button>
+<button onclick="showPage('Reports',this)">📊 Reports</button>
+<button onclick="showPage('Security',this)">🔐 Security & Backup</button>
+<button onclick="showPage('Settings',this)">⚙️ Hotel Settings</button>
 </nav>
-
 <main>
-    <!-- Dashboard Tab -->
-    <div id="dashboard" class="tab-content active">
-        <h1>Hotel Dashboard</h1>
-        <div class="cards">
-            <div class="card"><h2 id="total-rooms">24</h2>Total Rooms</div>
-            <div class="card"><h2 id="occupied-rooms">0</h2>Occupied Rooms</div>
-            <div class="card"><h2 id="vacant-rooms">24</h2>Vacant Rooms</div>
-            <div class="card"><h2 id="today-bookings">0</h2>Today's Bookings</div>
-        </div>
-    </div>
 
-    <!-- Rooms Tab -->
-    <div id="rooms" class="tab-content">
-        <h1>Room Management</h1>
-        <table>
-            <thead>
-                <tr><th>Room No</th><th>Type</th><th>Status</th></tr>
-            </thead>
-            <tbody id="rooms-table-body">
-                <!-- Data will load here -->
-            </tbody>
-        </table>
-    </div>
+<section id="Dashboard" class="section active">
+<h2>Hotel Dashboard</h2>
+<p>Welcome to DHUNVERSE HOTEL HMS</p>
+<div class="stats">
+<div class="stat"><small>Total Rooms</small><h2>24</h2></div>
+<div class="stat"><small>Occupied Rooms</small><h2>14</h2></div>
+<div class="stat"><small>Vacant Rooms</small><h2>10</h2></div>
+<div class="stat"><small>Occupancy</small><h2>58.3%</h2></div>
+</div>
+<h3>Quick Shortcuts</h3>
+<div class="shortcuts">
+<div class="shortcut" onclick="showPage('Reservations')"><span>📅</span>New Booking</div>
+<div class="shortcut" onclick="showPage('Check-in')"><span>🔑</span>Guest Check-in</div>
+<div class="shortcut" onclick="showPage('Check-out')"><span>🚪</span>Guest Check-out</div>
+<div class="shortcut" onclick="showPage('Billing')"><span>🧾</span>Billing</div>
+<div class="shortcut" onclick="showPage('Rooms')"><span>🛏️</span>Room Status</div>
+<div class="shortcut" onclick="showPage('POS')"><span>🍽️</span>Restaurant POS</div>
+<div class="shortcut" onclick="showPage('Housekeeping')"><span>🧹</span>Housekeeping</div>
+<div class="shortcut" onclick="showPage('Reports')"><span>📊</span>Reports</div>
+</div>
+<div class="card">
+<h3>System Notice</h3>
+<p>Demo version. Connect secure database before using real hotel records.</p>
+</div>
+</section>
 
-    <!-- Reservations Tab -->
-    <div id="reservations" class="tab-content">
-        <h1>New Reservation</h1>
-        <div class="card">
-            <form id="booking-form" onsubmit="bookRoom(event)">
-                <div class="form-group">
-                    <label>Guest Name</label>
-                    <input type="text" id="guest-name" required placeholder="Enter guest name">
-                </div>
-                <div class="form-group">
-                    <label>Assign Room</label>
-                    <select id="room-select" required></select>
-                </div>
-                <button type="submit">Confirm Booking</button>
-            </form>
-        </div>
-        
-        <h2 style="margin-top:20px;">Active Bookings</h2>
-        <table>
-            <thead>
-                <tr><th>Guest Name</th><th>Room No</th><th>Status</th></tr>
-            </thead>
-            <tbody id="bookings-table-body">
-                <tr><td colspan="3" style="text-align:center; color:#888;">No active bookings</td></tr>
-            </tbody>
-        </table>
-    </div>
+<section id="Rooms" class="section">
+<h2>Room Management</h2>
+<div class="card">
+<label>Room Number</label><input placeholder="Enter room number">
+<label>Room Type</label><select><option>Deluxe</option><option>Standard</option><option>Suite</option></select>
+<label>Status</label><select><option>Vacant</option><option>Occupied</option><option>Cleaning</option><option>Maintenance</option></select>
+<button class="action" onclick="alert('Database connection required to save rooms.')">Save Room</button>
+</div>
+</section>
 
-    <!-- Billing Tab -->
-    <div id="billing" class="tab-content">
-        <h1>Billing & Invoices</h1>
-        <table>
-            <thead>
-                <tr><th>Guest Name</th><th>Room</th><th>Amount</th><th>Status</th></tr>
-            </thead>
-            <tbody id="billing-table-body">
-                <tr><td colspan="4" style="text-align:center; color:#888;">No invoices generated</td></tr>
-            </tbody>
-        </table>
-    </div>
+<section id="Reservations" class="section">
+<h2>Reservations</h2>
+<div class="card">
+<label>Guest Name</label><input placeholder="Guest name">
+<label>Mobile Number</label><input placeholder="Mobile number">
+<label>Check-in Date</label><input type="date">
+<label>Check-out Date</label><input type="date">
+<label>Room Number</label><input placeholder="Room number">
+<button class="action" onclick="alert('Database connection required to save booking.')">Create Booking</button>
+</div>
+</section>
+
+<section id="Check-in" class="section">
+<h2>Guest Check-in</h2>
+<div class="card">
+<input placeholder="Booking ID">
+<input placeholder="Guest Name">
+<input placeholder="Room Number">
+<button class="action" onclick="alert('Secure booking database required.')">Confirm Check-in</button>
+</div>
+</section>
+
+<section id="Check-out" class="section">
+<h2>Guest Check-out</h2>
+<div class="card">
+<input placeholder="Room Number">
+<input placeholder="Booking ID">
+<button class="action" onclick="alert('Final bill and database verification required.')">Check-out</button>
+</div>
+</section>
+
+<section id="Billing" class="section">
+<h2>Billing & GST</h2>
+<div class="card">
+<label>Guest Name</label><input placeholder="Guest name">
+<label>Amount</label><input type="number" id="amount" placeholder="Amount">
+<label>GST Rate (%)</label><select id="gst"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option></select>
+<button class="action" onclick="calculateBill()">Calculate Demo Bill</button>
+<h3 id="billResult">Total: ₹0.00</h3>
+<p>Demo calculation only. Verify applicable GST rules before invoicing.</p>
+</div>
+</section>
+
+<section id="POS" class="section">
+<h2>Restaurant POS</h2>
+<div class="card">
+<input placeholder="Item Name">
+<input type="number" placeholder="Quantity">
+<input type="number" placeholder="Price">
+<button class="action" onclick="alert('POS database connection required.')">Add Order</button>
+</div>
+</section>
+
+<section id="Housekeeping" class="section">
+<h2>Housekeeping</h2>
+<div class="card">
+<label>Room Number</label><input placeholder="Room number">
+<select><option>Cleaning Pending</option><option>Cleaning In Progress</option><option>Cleaned</option><option>Maintenance</option></select>
+<button class="action" onclick="alert('Database connection required.')">Update Status</button>
+</div>
+</section>
+
+<section id="KYC" class="section">
+<h2>Guest KYC / C-Form</h2>
+<div class="card">
+<p>Guest verification and C-Form records will be connected to a secure database.</p>
+<p><b>Important:</b> Do not enter real Aadhaar, passport or guest details in this demo.</p>
+</div>
+</section>
+
+<section id="Staff" class="section">
+<h2>Staff & Attendance</h2>
+<div class="card">
+<input placeholder="Staff Name">
+<select><option>Front Office</option><option>Housekeeping</option><option>Restaurant</option><option>Accounts</option></select>
+<select><option>Present</option><option>Absent</option><option>Leave</option></select>
+<button class="action" onclick="alert('Database connection required.')">Save Demo Entry</button>
+</div>
+</section>
+
+<section id="Reports" class="section">
+<h2>Reports</h2>
+<div class="card">
+<p>Daily Revenue, Occupancy, ADR, RevPAR, GST and Payment Reports.</p>
+<p>Reports will calculate from verified database transactions after setup.</p>
+</div>
+</section>
+
+<section id="Security" class="section">
+<h2>Security & Backup</h2>
+<div class="card">
+<p>Database Backup, Audit Log, Role Permissions and Restore System.</p>
+<p>These features require secure backend setup. This page is only a demo.</p>
+</div>
+</section>
+
+<section id="Settings" class="section">
+<h2>Hotel Settings</h2>
+<div class="card">
+<input placeholder="Hotel Name">
+<input placeholder="Hotel Address">
+<input placeholder="GSTIN">
+<input placeholder="Hotel Contact">
+<button class="action" onclick="alert('Database connection required to save settings.')">Save Settings</button>
+</div>
+</section>
 </main>
-
+</div>
 <script>
-const rooms = [];
-for(let i=101; i<=112; i++) rooms.push({no: i, type: 'Deluxe', status: 'Vacant'});
-for(let i=201; i<=212; i++) rooms.push({no: i, type: 'Suite', status: 'Vacant'});
-
-const bookings = [];
-
-function updateDashboard() {
-    const total = rooms.length;
-    const occupied = rooms.filter(r => r.status === 'Occupied').length;
-    const vacant = total - occupied;
-    
-    document.getElementById('total-rooms').innerText = total;
-    document.getElementById('occupied-rooms').innerText = occupied;
-    document.getElementById('vacant-rooms').innerText = vacant;
-    document.getElementById('today-bookings').innerText = bookings.length;
+function showPage(id,btn){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+if(btn)btn.classList.add('active');
 }
-
-function initRoomsAndSelect() {
-    const tbody = document.getElementById('rooms-table-body');
-    const select = document.getElementById('room-select');
-    
-    tbody.innerHTML = '';
-    select.innerHTML = '<option value="">-- Select Available Room --</option>';
-    
-    rooms.forEach(room => {
-        const tr = document.createElement('tr');
-        const badgeClass = room.status === 'Vacant' ? 'status-vacant' : 'status-occupied';
-        tr.innerHTML = `<td>Room ${room.no}</td><td>${room.type}</td><td><span class="status-badge ${badgeClass}">${room.status}</span></td>`;
-        tbody.appendChild(tr);
-        
-        if(room.status === 'Vacant') {
-            const opt = document.createElement('option');
-            opt.value = room.no;
-            opt.innerText = `Room ${room.no} (${room.type})`;
-            select.appendChild(opt);
-        }
-    });
+function calculateBill(){
+let amount=Number(document.getElementById('amount').value)||0;
+let gst=Number(document.getElementById('gst').value)||0;
+let total=amount+(amount*gst/100);
+document.getElementById('billResult').innerText='Total: ₹'+total.toFixed(2);
 }
-
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-}
-
-function bookRoom(e) {
-    e.preventDefault();
-    const name = document.getElementById('guest-name').value;
-    const roomNo = parseInt(document.getElementById('room-select').value);
-    
-    if(!name || !roomNo) return;
-    
-    const room = rooms.find(r => r.no === roomNo);
-    if(room) room.status = 'Occupied';
-    
-    bookings.push({name: name, room: roomNo});
-    
-    updateDashboard();
-    initRoomsAndSelect();
-    updateBookingsTable();
-    updateBillingTable(name, roomNo);
-    
-    document.getElementById('booking-form').reset();
-    alert(`Room ${roomNo} successfully booked for ${name}!`);
-}
-
-function updateBookingsTable() {
-    const tbody = document.getElementById('bookings-table-body');
-    tbody.innerHTML = '';
-    bookings.forEach(b => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${b.name}</td><td>Room ${b.room}</td><td><span class="status-badge status-occupied">Checked In</span></td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// Fixed amount logic for simplicity
-function updateBillingTable(name, roomNo) {
-    const tbody = document.getElementById('billing-table-body');
-    if(bookings.length === 1) tbody.innerHTML = ''; 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${name}</td><td>Room ${roomNo}</td><td>₹2,500</td><td><span class="status-badge status-occupied">Pending</span></td>`;
-    tbody.appendChild(tr);
-}
-
-updateDashboard();
-initRoomsAndSelect();
 </script>
 </body>
 </html>
