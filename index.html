@@ -1,1 +1,205 @@
 
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DHUNVERSE HOTEL HMS</title>
+<style>
+body{font-family:Arial, sans-serif;background:#f1f4f9;margin:0;color:#17243a}
+header{background:#14243a;color:white;padding:22px;text-align:center}
+nav{background:white;padding:15px;text-align:center;box-shadow: 0 2px 4px rgba(0,0,0,0.1)}
+nav a{margin: 0 15px; text-decoration: none; color: #2459a6; font-weight: bold; cursor: pointer;}
+nav a:hover{color: #14243a;}
+main{padding:20px; max-width: 800px; margin: 0 auto;}
+h1{font-size:24px; color: #14243a}
+.tab-content{display: none;}
+.tab-content.active{display: block;}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px; margin-bottom: 20px;}
+.card{background:white;padding:22px;border-radius:12px;box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
+.card h2{color:#2459a6; margin: 0 0 10px 0;}
+.form-group{margin-bottom: 15px;}
+.form-group label{display: block; margin-bottom: 5px; font-weight: bold;}
+.form-group input, .form-group select{width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;}
+button{background: #2459a6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;}
+button:hover{background: #14243a;}
+table{width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
+th, td{padding: 12px; text-align: left; border-bottom: 1px solid #eee;}
+th{background: #2459a6; color: white;}
+.status-badge{padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;}
+.status-vacant{background: #e6f4ea; color: #137333;}
+.status-occupied{background: #fce8e6; color: #c5221f;}
+</style>
+</head>
+<body>
+
+<header>
+<h2>DHUNVERSE HOTEL HMS</h2>
+<p>Hotel Management System</p>
+</header>
+
+<nav>
+    <a onclick="switchTab('dashboard')">Dashboard</a> | 
+    <a onclick="switchTab('rooms')">Rooms</a> | 
+    <a onclick="switchTab('reservations')">Reservations</a> | 
+    <a onclick="switchTab('billing')">Billing</a>
+</nav>
+
+<main>
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+        <h1>Hotel Dashboard</h1>
+        <div class="cards">
+            <div class="card"><h2 id="total-rooms">24</h2>Total Rooms</div>
+            <div class="card"><h2 id="occupied-rooms">0</h2>Occupied Rooms</div>
+            <div class="card"><h2 id="vacant-rooms">24</h2>Vacant Rooms</div>
+            <div class="card"><h2 id="today-bookings">0</h2>Today's Bookings</div>
+        </div>
+    </div>
+
+    <!-- Rooms Tab -->
+    <div id="rooms" class="tab-content">
+        <h1>Room Management</h1>
+        <table>
+            <thead>
+                <tr><th>Room No</th><th>Type</th><th>Status</th></tr>
+            </thead>
+            <tbody id="rooms-table-body">
+                <!-- Data will load here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Reservations Tab -->
+    <div id="reservations" class="tab-content">
+        <h1>New Reservation</h1>
+        <div class="card">
+            <form id="booking-form" onsubmit="bookRoom(event)">
+                <div class="form-group">
+                    <label>Guest Name</label>
+                    <input type="text" id="guest-name" required placeholder="Enter guest name">
+                </div>
+                <div class="form-group">
+                    <label>Assign Room</label>
+                    <select id="room-select" required></select>
+                </div>
+                <button type="submit">Confirm Booking</button>
+            </form>
+        </div>
+        
+        <h2 style="margin-top:20px;">Active Bookings</h2>
+        <table>
+            <thead>
+                <tr><th>Guest Name</th><th>Room No</th><th>Status</th></tr>
+            </thead>
+            <tbody id="bookings-table-body">
+                <tr><td colspan="3" style="text-align:center; color:#888;">No active bookings</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Billing Tab -->
+    <div id="billing" class="tab-content">
+        <h1>Billing & Invoices</h1>
+        <table>
+            <thead>
+                <tr><th>Guest Name</th><th>Room</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody id="billing-table-body">
+                <tr><td colspan="4" style="text-align:center; color:#888;">No invoices generated</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+const rooms = [];
+for(let i=101; i<=112; i++) rooms.push({no: i, type: 'Deluxe', status: 'Vacant'});
+for(let i=201; i<=212; i++) rooms.push({no: i, type: 'Suite', status: 'Vacant'});
+
+const bookings = [];
+
+function updateDashboard() {
+    const total = rooms.length;
+    const occupied = rooms.filter(r => r.status === 'Occupied').length;
+    const vacant = total - occupied;
+    
+    document.getElementById('total-rooms').innerText = total;
+    document.getElementById('occupied-rooms').innerText = occupied;
+    document.getElementById('vacant-rooms').innerText = vacant;
+    document.getElementById('today-bookings').innerText = bookings.length;
+}
+
+function initRoomsAndSelect() {
+    const tbody = document.getElementById('rooms-table-body');
+    const select = document.getElementById('room-select');
+    
+    tbody.innerHTML = '';
+    select.innerHTML = '<option value="">-- Select Available Room --</option>';
+    
+    rooms.forEach(room => {
+        const tr = document.createElement('tr');
+        const badgeClass = room.status === 'Vacant' ? 'status-vacant' : 'status-occupied';
+        tr.innerHTML = `<td>Room ${room.no}</td><td>${room.type}</td><td><span class="status-badge ${badgeClass}">${room.status}</span></td>`;
+        tbody.appendChild(tr);
+        
+        if(room.status === 'Vacant') {
+            const opt = document.createElement('option');
+            opt.value = room.no;
+            opt.innerText = `Room ${room.no} (${room.type})`;
+            select.appendChild(opt);
+        }
+    });
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+}
+
+function bookRoom(e) {
+    e.preventDefault();
+    const name = document.getElementById('guest-name').value;
+    const roomNo = parseInt(document.getElementById('room-select').value);
+    
+    if(!name || !roomNo) return;
+    
+    const room = rooms.find(r => r.no === roomNo);
+    if(room) room.status = 'Occupied';
+    
+    bookings.push({name: name, room: roomNo});
+    
+    updateDashboard();
+    initRoomsAndSelect();
+    updateBookingsTable();
+    updateBillingTable(name, roomNo);
+    
+    document.getElementById('booking-form').reset();
+    alert(`Room ${roomNo} successfully booked for ${name}!`);
+}
+
+function updateBookingsTable() {
+    const tbody = document.getElementById('bookings-table-body');
+    tbody.innerHTML = '';
+    bookings.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${b.name}</td><td>Room ${b.room}</td><td><span class="status-badge status-occupied">Checked In</span></td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// Fixed amount logic for simplicity
+function updateBillingTable(name, roomNo) {
+    const tbody = document.getElementById('billing-table-body');
+    if(bookings.length === 1) tbody.innerHTML = ''; 
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${name}</td><td>Room ${roomNo}</td><td>₹2,500</td><td><span class="status-badge status-occupied">Pending</span></td>`;
+    tbody.appendChild(tr);
+}
+
+updateDashboard();
+initRoomsAndSelect();
+</script>
+</body>
+</html>
