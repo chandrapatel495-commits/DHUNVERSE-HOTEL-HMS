@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Heritage Inn Korba - Daily Function & Room Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 bg-opacity-90 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border-t-4 border-amber-600">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-slate-800">Hotel Heritage Inn</h1>
+                <p class="text-sm text-amber-600 font-semibold tracking-wider uppercase mt-1">Korba, Chhattisgarh</p>
+                <p class="text-gray-50text-xs mt-2 text-gray-500">Daily Function & Room Management Portal</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Admin Password</label>
+                    <input type="password" id="adminPassword" required placeholder="Enter password (default: admin123)" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                </div>
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md">
+                    Secure Login
+                </button>
+                <p class="text-xs text-center text-gray-400 mt-2">Default Password: <strong>admin123</strong></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP INTERFACE -->
+    <div id="mainApp" class="hidden min-h-screen flex flex-col">
+        <!-- Top Navbar -->
+        <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-amber-600 text-white p-2 rounded-lg font-bold text-lg">HHI</div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Hotel Heritage Inn</h1>
+                        <span class="text-xs text-amber-400">Korba Operations Dashboard</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="currentDateDisplay" class="text-xs text-gray-300 hidden sm:inline"></span>
+                    <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-xs px-3 py-2 rounded-md font-medium transition">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-white border-b border-gray-200 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 flex space-x-8 overflow-x-auto">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="py-4 px-2 border-b-2 border-amber-600 font-semibold text-amber-600 text-sm whitespace-nowrap">Dashboard</button>
+                <button onclick="switchTab('entry')" id="tab-entry" class="py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">New Booking Entry</button>
+                <button onclick="switchTab('rooms')" id="tab-rooms" class="py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">Room Status & Blocking</button>
+                <button onclick="switchTab('reports')" id="tab-reports" class="py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">Date-wise Reports</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="section-dashboard" class="space-y-6">
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Total Bookings</p>
+                            <h3 id="statTotalBookings" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="bg-amber-50 text-amber-600 p-3 rounded-xl text-xl font-bold">📋</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Total PAX</p>
+                            <h3 id="statTotalPax" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="bg-blue-50 text-blue-600 p-3 rounded-xl text-xl font-bold">👥</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Advance Collected</p>
+                            <h3 id="statTotalAdvance" class="text-2xl font-bold text-green-600 mt-1">₹0</h3>
+                        </div>
+                        <div class="bg-green-50 text-green-600 p-3 rounded-xl text-xl font-bold">💵</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Pending Balance</p>
+                            <h3 id="statTotalBalance" class="text-2xl font-bold text-red-600 mt-1">₹0</h3>
+                        </div>
+                        <div class="bg-red-50 text-red-600 p-3 rounded-xl text-xl font-bold">⚠️</div>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings Table Preview -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold text-slate-800">Recent Function Entries</h3>
+                        <button onclick="switchTab('entry')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition">+ Add New Booking</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Client Name</th>
+                                    <th class="p-3">Outlet</th>
+                                    <th class="p-3">PAX</th>
+                                    <th class="p-3">Total (₹)</th>
+                                    <th class="p-3">Advance (₹)</th>
+                                    <th class="p-3">Balance (₹)</th>
+                                    <th class="p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBookingsTableBody" class="divide-y divide-gray-200 text-sm">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: NEW BOOKING ENTRY -->
+            <section id="section-entry" class="hidden bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div class="mb-6 border-b pb-4">
+                    <h2 class="text-xl font-bold text-slate-800">Daily Function & Room Booking Form</h2>
+                    <p class="text-sm text-gray-500">Fill in client details, select venue outlet, block associated rooms and calculate payment balances.</p>
+                </div>
+                <form id="bookingForm" onsubmit="saveBooking(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Function Date *</label>
+                            <input type="date" id="bookingDate" required class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Client Name *</label>
+                            <input type="text" id="clientName" required placeholder="Enter client full name" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number *</label>
+                            <input type="tel" id="clientPhone" required placeholder="10-digit mobile number" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Function / Event Type *</label>
+                            <input type="text" id="functionType" required placeholder="e.g. Wedding, Reception, Birthday" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Select Outlet *</label>
+                            <select id="outletSelect" required class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                                <option value="">-- Choose Outlet --</option>
+                                <option value="PDR 1">PDR 1</option>
+                                <option value="PDR 2">PDR 2</option>
+                                <option value="BANDHAN HALL">BANDHAN HALL</option>
+                                <option value="T / JAM">T / JAM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">PAX (Guests Count) *</label>
+                            <input type="number" id="paxCount" min="1" required placeholder="Total guests" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Room Blocking Multi-Select Section -->
+                    <div class="border border-amber-200 bg-amber-50/40 p-4 rounded-xl">
+                        <label class="block text-sm font-semibold text-slate-800 mb-2">Block Rooms (Optional): Select rooms assigned for this function</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2" id="roomCheckboxesContainer">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount (₹) *</label>
+                            <input type="number" id="totalAmount" required oninput="calculateBalance()" placeholder="0.00" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Advance Paid (₹) *</label>
+                            <input type="number" id="advanceAmount" required oninput="calculateBalance()" placeholder="0.00" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Balance Due (₹)</label>
+                            <input type="number" id="balanceAmount" readonly class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg text-sm font-bold text-red-600 focus:outline-none" value="0">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Special Remarks / Notes</label>
+                        <textarea id="bookingRemarks" rows="2" placeholder="Catering notes, decoration guidelines, etc." class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" onclick="resetForm()" class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 text-sm hover:bg-gray-100 transition">Reset</button>
+                        <button type="submit" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg text-sm shadow-md transition">Save Function Booking</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- TAB 3: ROOM STATUS & INVENTORY -->
+            <section id="section-rooms" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Room Status & Blocking Grid</h2>
+                            <p class="text-sm text-gray-500">Overview of 24 rooms across 2nd and 3rd floors.</p>
+                        </div>
+                        <div class="flex items-center space-x-4 text-xs font-medium">
+                            <span class="flex items-center"><span class="w-3 h-3 bg-green-500 rounded-full inline-block mr-1"></span> Available</span>
+                            <span class="flex items-center"><span class="w-3 h-3 bg-red-500 rounded-full inline-block mr-1"></span> Booked / Blocked</span>
+                        </div>
+                    </div>
+
+                    <!-- Floor 2 -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-amber-700 bg-amber-50 p-2.5 rounded-lg mb-3 text-sm">2nd Floor Rooms (201 - 212)</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3" id="floor2Grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Floor 3 -->
+                    <div>
+                        <h3 class="font-bold text-amber-700 bg-amber-50 p-2.5 rounded-lg mb-3 text-sm">3rd Floor Rooms (301 - 312)</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3" id="floor3Grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: DATE-WISE REPORTS -->
+            <section id="section-reports" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Date-wise Function & Financial Reports</h2>
+                            <p class="text-sm text-gray-500">Filter bookings by date range, outlet, or search client name.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2.5 rounded-lg font-medium transition flex items-center space-x-1">📥 Export Excel</button>
+                            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2.5 rounded-lg font-medium transition flex items-center space-x-1">🖨️ Print Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">From Date</label>
+                            <input type="date" id="filterFromDate" onchange="filterBookings()" class="w-full p-2.5 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">To Date</label>
+                            <input type="date" id="filterToDate" onchange="filterBookings()" class="w-full p-2.5 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Filter Outlet</label>
+                            <select id="filterOutlet" onchange="filterBookings()" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <option value="">All Outlets</option>
+                                <option value="PDR 1">PDR 1</option>
+                                <option value="PDR 2">PDR 2</option>
+                                <option value="BANDHAN HALL">BANDHAN HALL</option>
+                                <option value="T / JAM">T / JAM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Search Client / Phone</label>
+                            <input type="text" id="filterSearch" oninput="filterBookings()" placeholder="Client name or phone..." class="w-full p-2.5 border rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Report Table -->
+                    <div class="overflow-x-auto pt-2">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Client Name</th>
+                                    <th class="p-3">Phone</th>
+                                    <th class="p-3">Outlet</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Rooms</th>
+                                    <th class="p-3">PAX</th>
+                                    <th class="p-3">Total (₹)</th>
+                                    <th class="p-3">Advance (₹)</th>
+                                    <th class="p-3">Balance (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="divide-y divide-gray-200 text-sm">
+                                <!-- Dynamic filtered rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const ROOM_LIST = [
+            '201', '202', '203', '204', '205', '206', '207', '208', '209', '210', '211', '212',
+            '301', '302', '303', '304', '305', '306', '307', '308', '309', '310', '311', '312'
+        ];
+
+        let bookings = JSON.parse(localStorage.getItem('hhi_bookings')) || [
+            {
+                id: 1,
+                date: "2026-03-20",
+                clientName: "Rajesh Kumar",
+                phone: "9827123456",
+                functionType: "Engagement",
+                outlet: "BANDHAN HALL",
+                pax: 250,
+                rooms: ["201", "202"],
+                totalAmount: 50000,
+                advanceAmount: 20000,
+                balanceAmount: 30000,
+                remarks: "VIP catering requested"
+            }
+        ];
+
+        // Init on load
+        window.onload = function() {
+            document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('hi-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('bookingDate').valueAsDate = new Date();
+            renderRoomCheckboxes();
+            renderRoomStatusGrid();
+            updateDashboard();
+        };
+
+        // Login Handler
+        function handleLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPassword').value;
+            if(pass === 'admin123') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                updateDashboard();
+            } else {
+                alert('गलत पासवर्ड! कृपया सही पासवर्ड (admin123) दर्ज करें।');
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            ['dashboard', 'entry', 'rooms', 'reports'].forEach(t => {
+                document.getElementById(`section-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('border-amber-600', 'text-amber-600', 'font-semibold');
+                document.getElementById(`tab-${t}`).classList.add('border-transparent', 'text-gray-500', 'font-medium');
+            });
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('border-amber-600', 'text-amber-600', 'font-semibold');
+            document.getElementById(`tab-${tabId}`).classList.remove('border-transparent', 'text-gray-500', 'font-medium');
+
+            if(tabId === 'reports') filterBookings();
+            if(tabId === 'rooms') renderRoomStatusGrid();
+        }
+
+        // Render Room Checkboxes in Form
+        function renderRoomCheckboxes() {
+            const container = document.getElementById('roomCheckboxesContainer');
+            container.innerHTML = ROOM_LIST.map(room => `
+                <label class="flex items-center space-x-1.5 bg-white p-2 rounded border border-amber-100 text-xs cursor-pointer hover:bg-amber-50">
+                    <input type="checkbox" name="bookingRooms" value="${room}" class="rounded text-amber-600 focus:ring-amber-500">
+                    <span class="font-semibold text-slate-700">Room ${room}</span>
+                </label>
+            `).join('');
+        }
+
+        // Calculate Balance
+        function calculateBalance() {
+            const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+            const advance = parseFloat(document.getElementById('advanceAmount').value) || 0;
+            const balance = total - advance;
+            document.getElementById('balanceAmount').value = balance;
+        }
+
+        // Save Booking
+        function saveBooking(e) {
+            e.preventDefault();
+            const selectedRooms = Array.from(document.querySelectorAll('input[name="bookingRooms"]:checked')).map(cb => cb.value);
+
+            const newBooking = {
+                id: Date.now(),
+                date: document.getElementById('bookingDate').value,
+                clientName: document.getElementById('clientName').value,
+                phone: document.getElementById('clientPhone').value,
+                functionType: document.getElementById('functionType').value,
+                outlet: document.getElementById('outletSelect').value,
+                pax: parseInt(document.getElementById('paxCount').value) || 0,
+                rooms: selectedRooms,
+                totalAmount: parseFloat(document.getElementById('totalAmount').value) || 0,
+                advanceAmount: parseFloat(document.getElementById('advanceAmount').value) || 0,
+                balanceAmount: parseFloat(document.getElementById('balanceAmount').value) || 0,
+                remarks: document.getElementById('bookingRemarks').value
+            };
+
+            bookings.unshift(newBooking);
+            localStorage.setItem('hhi_bookings', JSON.stringify(bookings));
+
+            alert('बुकिंग सफलतापूर्वक सुरक्षित कर ली गई है!');
+            resetForm();
+            updateDashboard();
+            switchTab('dashboard');
+        }
+
+        function resetForm() {
+            document.getElementById('bookingForm').reset();
+            document.getElementById('bookingDate').valueAsDate = new Date();
+            document.getElementById('balanceAmount').value = '0';
+        }
+
+        // Update Dashboard Statistics & Recent Table
+        function updateDashboard() {
+            document.getElementById('statTotalBookings').innerText = bookings.length;
+            const totalPax = bookings.reduce((sum, b) => sum + b.pax, 0);
+            const totalAdv = bookings.reduce((sum, b) => sum + b.advanceAmount, 0);
+            const totalBal = bookings.reduce((sum, b) => sum + b.balanceAmount, 0);
+
+            document.getElementById('statTotalPax').innerText = totalPax;
+            document.getElementById('statTotalAdvance').innerText = '₹' + totalAdv.toLocaleString('en-IN');
+            document.getElementById('statTotalBalance').innerText = '₹' + totalBal.toLocaleString('en-IN');
+
+            const tbody = document.getElementById('recentBookingsTableBody');
+            tbody.innerHTML = bookings.slice(0, 5).map(b => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 text-gray-600">${b.date}</td>
+                    <td class="p-3 font-medium text-slate-800">${b.clientName}</td>
+                    <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-semibold">${b.outlet}</span></td>
+                    <td class="p-3">${b.pax}</td>
+                    <td class="p-3 font-semibold">₹${b.totalAmount.toLocaleString('en-IN')}</td>
+                    <td class="p-3 text-green-600 font-semibold">₹${b.advanceAmount.toLocaleString('en-IN')}</td>
+                    <td class="p-3 text-red-600 font-semibold">₹${b.balanceAmount.toLocaleString('en-IN')}</td>
+                    <td class="p-3">
+                        <button onclick="deleteBooking(${b.id})" class="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="8" class="p-4 text-center text-gray-400">No bookings recorded yet.</td></tr>`;
+        }
+
+        function deleteBooking(id) {
+            if(confirm('क्या आप इस बुकिंग को डिलीट करना चाहते हैं?')) {
+                bookings = bookings.filter(b => b.id !== id);
+                localStorage.setItem('hhi_bookings', JSON.stringify(bookings));
+                updateDashboard();
+            }
+        }
+
+        // Room Status Grid Render
+        function renderRoomStatusGrid() {
+            // Find all blocked rooms from current bookings
+            const blockedRooms = new Set();
+            bookings.forEach(b => {
+                if(b.rooms) b.rooms.forEach(r => blockedRooms.add(r));
+            });
+
+            const renderGrid = (floorPrefix, containerId) => {
+                const container = document.getElementById(containerId);
+                const rooms = ROOM_LIST.filter(r => r.startsWith(floorPrefix));
+                container.innerHTML = rooms.map(room => {
+                    const isBooked = blockedRooms.has(room);
+                    return `
+                        <div class="p-3 rounded-lg border text-center transition ${isBooked ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}">
+                            <div class="font-bold text-base">${room}</div>
+                            <div class="text-[10px] font-semibold mt-1 uppercase tracking-wider">${isBooked ? 'Blocked' : 'Available'}</div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            renderGrid('2', 'floor2Grid');
+            renderGrid('3', 'floor3Grid');
+        }
+
+        // Date-wise & Filter Reports
+        function filterBookings() {
+            const from = document.getElementById('filterFromDate').value;
+            const to = document.getElementById('filterToDate').value;
+            const outlet = document.getElementById('filterOutlet').value;
+            const search = document.getElementById('filterSearch').value.toLowerCase();
+
+            const filtered = bookings.filter(b => {
+                let match = true;
+                if(from && b.date < from) match = false;
+                if(to && b.date > to) match = false;
+                if(outlet && b.outlet !== outlet) match = false;
+                if(search && !b.clientName.toLowerCase().includes(search) && !b.phone.includes(search)) match = false;
+                return match;
+            });
+
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = filtered.map(b => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 text-gray-600">${b.date}</td>
+                    <td class="p-3 font-medium text-slate-800">${b.clientName}</td>
+                    <td class="p-3 text-gray-600">${b.phone}</td>
+                    <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-semibold">${b.outlet}</span></td>
+                    <td class="p-3">${b.functionType}</td>
+                    <td class="p-3 font-mono text-xs">${b.rooms && b.rooms.length ? b.rooms.join(', ') : '-'}</td>
+                    <td class="p-3">${b.pax}</td>
+                    <td class="p-3 font-semibold">₹${b.totalAmount.toLocaleString('en-IN')}</td>
+                    <td class="p-3 text-green-600 font-semibold">₹${b.advanceAmount.toLocaleString('en-IN')}</td>
+                    <td class="p-3 text-red-600 font-semibold">₹${b.balanceAmount.toLocaleString('en-IN')}</td>
+                </tr>
+            `).join('') || `<tr><td colspan="10" class="p-6 text-center text-gray-400">No matching bookings found for selected filters.</td></tr>`;
+        }
+
+        // Export Excel
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(bookings.map(b => ({
+                Date: b.date,
+                ClientName: b.clientName,
+                Phone: b.phone,
+                Outlet: b.outlet,
+                FunctionType: b.functionType,
+                RoomsAssigned: b.rooms ? b.rooms.join(', ') : '',
+                PAX: b.pax,
+                TotalAmount: b.totalAmount,
+                AdvancePaid: b.advanceAmount,
+                BalanceDue: b.balanceAmount,
+                Remarks: b.remarks
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "BookingsReport");
+            XLSX.writeFile(wb, "HotelHeritageInn_Bookings_Report.xlsx");
+        }
+    </script>
+</body>
+</html>
