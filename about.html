@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Function Report</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Arial;
+ background:#eef2f7;color:#172554;
+}
+header{
+ background:linear-gradient(120deg,#10234f,#176b87);
+ color:white;padding:22px;text-align:center;
+}
+.container{max-width:1100px;margin:auto;padding:15px}
+.card{
+ background:white;padding:18px;margin:15px 0;
+ border-radius:12px;
+ box-shadow:0 3px 12px #0001;
+}
+h2{color:#176b87}
+input,select,textarea{
+ width:100%;padding:12px;margin:7px 0 14px;
+ border:1px solid #cbd5e1;border-radius:7px;
+ font-size:15px;
+}
+label{font-weight:bold}
+button{
+ padding:11px 16px;border:0;border-radius:7px;
+ background:#087e8b;color:white;
+ font-weight:bold;margin:4px;cursor:pointer;
+}
+.delete{background:#dc3545}
+.edit{background:#e69b20}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{padding:11px;border:1px solid #ddd;text-align:left}
+th{background:#12345a;color:white}
+.table-wrap{overflow-x:auto}
+small{color:#64748b}
+</style>
+</head>
+<body>
+
+<header>
+<h1>DAILY FUNCTION REPORT</h1>
+<p>Hotel Outlet & Block Room Management</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>New Function Entry</h2>
+
+<label>Function Date</label>
+<input type="date" id="date">
+
+<label>Outlet Name</label>
+<select id="outlet">
+<option value="">Select Outlet</option>
+<option>PDR 1</option>
+<option>PDR 2</option>
+<option>TRAFFIC JAM</option>
+<option>BANDHAN HALL</option>
+<option>BLOCK ROOM</option>
+</select>
+
+<label>Function Name</label>
+<input id="function" placeholder="Enter Function Name">
+
+<label>Client Name</label>
+<input id="client" placeholder="Enter Client Name">
+
+<label>Total Pax</label>
+<input type="number" id="pax" min="0" placeholder="Enter Pax">
+
+<label>Block Room Numbers</label>
+<div id="rooms"></div>
+
+<label>Block Room Details</label>
+<textarea id="roomDetails" placeholder="Enter room details"></textarea>
+
+<label>Outlet Description</label>
+<textarea id="description" placeholder="Enter Function Description"></textarea>
+
+<label>Entry By</label>
+<input id="entryBy" placeholder="Staff Name">
+
+<button onclick="saveEntry()">SAVE ENTRY</button>
+<button onclick="clearForm()">CLEAR</button>
+</div>
+
+<div class="card">
+<h2>Daily Function Report</h2>
+
+<label>Search by Date</label>
+<input type="date" id="searchDate" oninput="showEntries()">
+
+<input id="search" placeholder="Search Function / Outlet / Client"
+oninput="showEntries()">
+
+<button onclick="window.print()">PRINT REPORT</button>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Outlet</th>
+<th>Function</th>
+<th>Client</th>
+<th>Pax</th>
+<th>Block Rooms</th>
+<th>Description</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="report"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<script>
+const roomList = [
+"201","202","203","204","205","206",
+"207","208","209","210","211","212",
+"301","302","303","304","305","306",
+"307","308","309","310","311","312"
+];
+
+document.getElementById("rooms").innerHTML =
+roomList.map(r =>
+`<label style="display:inline-block;margin:7px">
+<input type="checkbox" value="${r}" class="room"
+style="width:auto;margin:0 4px">
+${r}</label>`
+).join("");
+
+let entries = JSON.parse(
+localStorage.getItem("functionEntries") || "[]"
+);
+let editId = null;
+
+document.getElementById("date").value =
+new Date().toLocaleDateString("en-CA");
+
+function saveEntry(){
+const date = document.getElementById("date").value;
+const outlet = document.getElementById("outlet").value;
+const fn = document.getElementById("function").value.trim();
+const client = document.getElementById("client").value.trim();
+const pax = document.getElementById("pax").value;
+
+if(!date || !outlet || !fn || pax === ""){
+ alert("Please fill Date, Outlet, Function and Pax");
+ return;
+}
+
+const rooms = [...document.querySelectorAll(".room:checked")]
+.map(x=>x.value);
+
+const item = {
+id: editId || Date.now(),
+date,outlet,fn,client,pax,rooms,
+roomDetails:document.getElementById("roomDetails").value,
+description:document.getElementById("description").value,
+entryBy:document.getElementById("entryBy").value
+};
+
+if(editId){
+entries=entries.map(e=>e.id===editId?item:e);
+}else{
+entries.push(item);
+}
+
+localStorage.setItem("functionEntries",JSON.stringify(entries));
+clearForm();
+showEntries();
+alert("Function Entry Saved Successfully!");
+}
+
+function showEntries(){
+const d=document.getElementById("searchDate").value;
+const q=document.getElementById("search").value.toLowerCase();
+
+const filtered=entries.filter(e=>
+(!d || e.date===d) &&
+JSON.stringify(e).toLowerCase().includes(q)
+).sort((a,b)=>b.date.localeCompare(a.date));
+
+document.getElementById("report").innerHTML =
+filtered.map(e=>`
+<tr>
+<td>${e.date}</td>
+<td>${safe(e.outlet)}</td>
+<td>${safe(e.fn)}</td>
+<td>${safe(e.client)}</td>
+<td>${safe(e.pax)}</td>
+<td>${safe(e.rooms.join(", "))}<br>${safe(e.roomDetails)}</td>
+<td>${safe(e.description)}</td>
+<td>
+<button class="edit" onclick="editEntry(${e.id})">Edit</button>
+<button class="delete" onclick="deleteEntry(${e.id})">Delete</button>
+</td>
+</tr>`).join("");
+}
+
+function editEntry(id){
+const e=entries.find(x=>x.id===id);
+if(!e)return;
+editId=id;
+document.getElementById("date").value=e.date;
+document.getElementById("outlet").value=e.outlet;
+document.getElementById("function").value=e.fn;
+document.getElementById("client").value=e.client;
+document.getElementById("pax").value=e.pax;
+document.getElementById("roomDetails").value=e.roomDetails;
+document.getElementById("description").value=e.description;
+document.getElementById("entryBy").value=e.entryBy;
+
+document.querySelectorAll(".room").forEach(x=>{
+x.checked=e.rooms.includes(x.value);
+});
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteEntry(id){
+if(confirm("Delete this entry?")){
+entries=entries.filter(e=>e.id!==id);
+localStorage.setItem("functionEntries",JSON.stringify(entries));
+showEntries();
+}
+}
+
+function clearForm(){
+editId=null;
+document.querySelectorAll(
+"input:not([type=checkbox]),textarea"
+).forEach(x=>{
+if(x.id!=="date")x.value="";
+});
+document.getElementById("date").value=
+new Date().toLocaleDateString("en-CA");
+document.getElementById("outlet").value="";
+document.querySelectorAll(".room").forEach(x=>x.checked=false);
+}
+
+function safe(value){
+return String(value ?? "").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",
+'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+showEntries();
+</script>
+</body>
+  </html>
+  
